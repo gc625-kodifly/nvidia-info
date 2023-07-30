@@ -1,0 +1,39 @@
+#!/bin/bash
+
+echo "Nvidia Information:"
+echo "--------------------------------------------------"
+
+# Check if verbose flag was passed
+VERBOSE=0
+if [[ "$1" == "-v" || "$1" == "--verbose" ]]; then
+    VERBOSE=1
+fi
+
+# Get CUDA Toolkit version
+if [[ $VERBOSE -eq 1 ]]; then
+    echo "Full CUDA Toolkit Version Info:"
+    nvcc --version
+else
+    echo -n "CUDA Toolkit Version: "
+    nvcc --version | grep "release" | awk '{print $6}' | cut -d',' -f1
+fi
+
+# Get Nvidia driver version
+if [[ $VERBOSE -eq 1 ]]; then
+    echo "Full Nvidia Driver Version Info:"
+    nvidia-smi
+else
+    echo -n "Nvidia Driver Version: "
+    nvidia-smi --query-gpu=driver_version --format=csv,noheader
+fi
+
+# Get cuDNN version
+if [[ $VERBOSE -eq 1 ]]; then
+    echo "Full cuDNN Version Info:"
+    cat /usr/local/cuda/include/cudnn_version.h
+else
+    echo -n "cuDNN Version: "
+    cat /usr/local/cuda/include/cudnn_version.h | grep -E "#define CUDNN_(MAJOR|MINOR|PATCHLEVEL)" | awk '{print $NF}' | paste -sd'.' -
+fi
+
+echo "--------------------------------------------------"
